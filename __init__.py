@@ -50,13 +50,15 @@ class MHH_prepare(Operator):
 
         bpy.ops.object.select_all(action='DESELECT')
 
-        for ob in bpy.data.objects:
-            if ob.type == 'MESH':
-                if any(mod for mod in ob.modifiers if mod.type == 'FLUID'):
-                    bpy.context.view_layer.objects.active = ob
-                    ob.select_set(True)
-                    noreturn = bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
-                    noreturn = bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        #for ob in bpy.data.objects:
+        for ob in bpy.context.view_layer.objects:
+            if ob.visible_get():
+                if ob.type == 'MESH':
+                    if any(mod for mod in ob.modifiers if mod.type == 'FLUID'):
+                        bpy.context.view_layer.objects.active = ob
+                        ob.select_set(True)
+                        noreturn = bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
+                        noreturn = bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 
         if len(current_selection) > 0:
             for ob in current_selection:
@@ -75,21 +77,23 @@ class MHH_reset_cache(Operator):
     bl_description = "Reset Cache"
 
     def execute(self, context):
-        for ob in bpy.data.objects:
-            if ob.type == 'MESH':
-                for mod in ob.modifiers:
-                    if mod.type == 'FLUID':
-                        if mod.fluid_type == "DOMAIN":
-                            bpy.ops.screen.frame_jump(0)
-                            now = datetime.now()
-                            time = '_MFH_' + str(now.hour) + '_' + str(now.minute) + '_' + str(now.second) + '_' +  str(now.microsecond)
-                            print(mod.domain_settings.cache_directory + time)
-                            if 'MFH' in mod.domain_settings.cache_directory:
-                                m = re.match(r'^(.*)(_MFH_.*)$', mod.domain_settings.cache_directory)
-                                if m:
-                                    mod.domain_settings.cache_directory = mod.domain_settings.cache_directory.replace(m.group(2), time)
-                            else:
-                                mod.domain_settings.cache_directory = mod.domain_settings.cache_directory + time
+        for ob in bpy.context.view_layer.objects:
+            if ob.visible_get():
+                if ob.type == 'MESH':
+                    for mod in ob.modifiers:
+                        if mod.type == 'FLUID':
+                            if mod.fluid_type == "DOMAIN":
+                                bpy.ops.screen.frame_jump(0)
+                                now = datetime.now()
+                                time = '_MFH_' + str(now.hour) + '_' + str(now.minute) + '_' + str(now.second) + '_' +  str(now.microsecond)
+                                print(mod.domain_settings.cache_directory + time)
+                                if 'MFH' in mod.domain_settings.cache_directory:
+                                    m = re.match(r'^(.*)(_MFH_.*)$', mod.domain_settings.cache_directory)
+                                    if m:
+                                        mod.domain_settings.cache_directory = mod.domain_settings.cache_directory.replace(m.group(2), time)
+                                else:
+                                    mod.domain_settings.cache_directory = mod.domain_settings.cache_directory + time
+                                return {'FINISHED'}
 
         return {'FINISHED'}
 
