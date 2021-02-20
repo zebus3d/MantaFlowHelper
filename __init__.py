@@ -5,7 +5,7 @@ import os, shutil
 bl_info = {
     "name": "MantaFlowHelper",
     "author": "Jorge Hernandez Melendez",
-    "version": (0, 3),
+    "version": (0, 4),
     "blender": (2, 90, 0),
     "location": "",
     "description": "",
@@ -78,38 +78,53 @@ class MHH_prepare(Operator):
 class Confirm_Dialog(Operator):
     """Really?"""
     bl_idname = "mfh.rc_confirm"
-    bl_label = "Do you really want to Remove Cache?"
+    bl_label = "Do you really want to Remove Cache? (is irreversible)"
     bl_options = {'REGISTER', 'INTERNAL'}
+
+    confirm: bpy.props.EnumProperty(
+        name=' ',
+        items= [
+            ('True',"Proceed",''),
+            ('False',"Cancel",''),
+        ],
+    )
 
     @classmethod
     def poll(cls, context):
         return True
 
     def execute(self, context):
-        self.report({'INFO'}, "YES!")
-        for ob in bpy.context.view_layer.objects:
-            if ob.visible_get():
-                if ob.type == 'MESH':
-                    for mod in ob.modifiers:
-                        if mod.type == 'FLUID':
-                            if mod.fluid_type == "DOMAIN":
-                                print("limpiando cache")
-                                bpy.ops.screen.frame_jump(0)
-                                current_resolution = mod.domain_settings.resolution_max
-                                cache_path = mod.domain_settings.cache_directory
-                                shutil.rmtree(cache_path, ignore_errors = True)
-                                mod.domain_settings.resolution_max = current_resolution
-
-        return {'FINISHED'}
+        # self.report({'INFO'}, "YES!")
+        if self.confirm == 'True':
+            for ob in bpy.context.view_layer.objects:
+                if ob.visible_get():
+                    if ob.type == 'MESH':
+                        for mod in ob.modifiers:
+                            if mod.type == 'FLUID':
+                                if mod.fluid_type == "DOMAIN":
+                                    bpy.ops.screen.frame_jump(0)
+                                    current_resolution = mod.domain_settings.resolution_max
+                                    cache_path = mod.domain_settings.cache_directory
+                                    shutil.rmtree(cache_path, ignore_errors = True)
+                                    mod.domain_settings.resolution_max = current_resolution
+            return {'FINISHED'}
+        else:
+            return {'CANCELLED'}
 
     def invoke(self, context, event):
-        return context.window_manager.invoke_confirm(self, event)
+        return context.window_manager.invoke_props_dialog(self)
+
+    def draw(self, context):
+        layout = self.layout
+        flow = layout.grid_flow(align=True)
+        col = flow.column()
+        row = col.row()
+        row.prop(self, "confirm", expand=True)
 
 
 all_classes = [
     MFH_PT_ui,
     MHH_prepare,
-    MHH_reset_cache,
     Confirm_Dialog,
 ]
 
