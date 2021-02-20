@@ -9,9 +9,9 @@ bl_info = {
     "version": (0, 1),
     "blender": (2, 90, 0),
     "location": "",
-    "description": "",
+    "description": "Helper for MantaFlow",
     "warning": "",
-    "wiki_url": "",
+    "wiki_url": "https://github.com/zebus3d/MantaFlowHelper",
     "category": "Physics",
     }
 
