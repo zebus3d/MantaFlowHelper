@@ -5,7 +5,7 @@ import os, shutil
 bl_info = {
     "name": "MantaFlowHelper",
     "author": "Jorge Hernandez Melendez",
-    "version": (0, 2),
+    "version": (0, 3),
     "blender": (2, 90, 0),
     "location": "",
     "description": "",
@@ -15,6 +15,10 @@ bl_info = {
     }
 
 from bpy.types import (Panel, Operator)
+from bpy.utils import register_class
+from bpy.utils import unregister_class
+from bpy.props import EnumProperty
+from bpy.types import WindowManager
 
 
 class MFH_PT_ui(Panel):
@@ -31,7 +35,7 @@ class MFH_PT_ui(Panel):
         flow = layout.grid_flow(align=True)
         col = flow.column()
         col.operator("mfh.prepare", text="Prepare all manta objects")
-        col.operator("mfh.rcache", text="Reset Cache")
+        col.operator("mfh.rc_confirm", text="Reset Cache")
 
 
 class MHH_prepare(Operator):
@@ -71,54 +75,53 @@ class MHH_prepare(Operator):
         return {'FINISHED'}
 
 
-class MHH_reset_cache(Operator):
-    bl_idname = "mfh.rcache"
-    bl_label = "Reset Cache"
-    bl_description = "Reset Cache"
+class Confirm_Dialog(Operator):
+    """Really?"""
+    bl_idname = "mfh.rc_confirm"
+    bl_label = "Do you really want to Remove Cache?"
+    bl_options = {'REGISTER', 'INTERNAL'}
+
+    @classmethod
+    def poll(cls, context):
+        return True
 
     def execute(self, context):
+        self.report({'INFO'}, "YES!")
         for ob in bpy.context.view_layer.objects:
             if ob.visible_get():
                 if ob.type == 'MESH':
                     for mod in ob.modifiers:
                         if mod.type == 'FLUID':
                             if mod.fluid_type == "DOMAIN":
+                                print("limpiando cache")
                                 bpy.ops.screen.frame_jump(0)
                                 current_resolution = mod.domain_settings.resolution_max
                                 cache_path = mod.domain_settings.cache_directory
                                 shutil.rmtree(cache_path, ignore_errors = True)
                                 mod.domain_settings.resolution_max = current_resolution
 
-                                return {'FINISHED'}
-
         return {'FINISHED'}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_confirm(self, event)
 
 
 all_classes = [
     MFH_PT_ui,
     MHH_prepare,
     MHH_reset_cache,
+    Confirm_Dialog,
 ]
 
 
 def register():
-    from bpy.utils import register_class
-
-    if len(all_classes) > 1:
-        for cls in all_classes:
-            register_class(cls)
-    else:
-        register_class(all_classes[0])
+    for cls in all_classes:
+        register_class(cls)
 
 
 def unregister():
-    from bpy.utils import unregister_class
-
-    if len(all_classes) > 1:
-        for cls in reversed(all_classes):
-            unregister_class(cls)
-    else:
-        unregister_class(all_classes[0])
+    for cls in reversed(all_classes):
+        unregister_class(cls)
 
 
 if __name__ == "__main__":
