@@ -94,7 +94,6 @@ class Confirm_Dialog(Operator):
         return True
 
     def execute(self, context):
-        # self.report({'INFO'}, "YES!")
         if self.confirm == 'True':
             for ob in bpy.context.view_layer.objects:
                 if ob.visible_get():
