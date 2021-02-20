@@ -1,2 +1,2 @@
 # MantaFlowHelper
-Help for use MantaFlow
+Helper for use MantaFlow
