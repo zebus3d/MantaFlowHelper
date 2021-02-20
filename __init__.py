@@ -1,17 +1,16 @@
 import bpy
 from datetime import datetime
-import re
-
+import re, os, shutil
 
 bl_info = {
     "name": "MantaFlowHelper",
     "author": "Jorge Hernandez Melendez",
-    "version": (0, 1),
+    "version": (0, 2),
     "blender": (2, 90, 0),
     "location": "",
-    "description": "Helper for MantaFlow",
+    "description": "",
     "warning": "",
-    "wiki_url": "https://github.com/zebus3d/MantaFlowHelper",
+    "wiki_url": "",
     "category": "Physics",
     }
 
@@ -38,7 +37,7 @@ class MFH_PT_ui(Panel):
 class MHH_prepare(Operator):
     bl_idname = "mfh.prepare"
     bl_label = "Prepare all manta objects"
-    bl_description = "Prepare all objects for work correctly with MantaFlow"
+    bl_description = "Set Origin to Geometry and Apply Scale in All Visible Mantaflow Objects"
 
     def execute(self, context):
         current_selection = bpy.context.selected_objects
@@ -84,15 +83,11 @@ class MHH_reset_cache(Operator):
                         if mod.type == 'FLUID':
                             if mod.fluid_type == "DOMAIN":
                                 bpy.ops.screen.frame_jump(0)
-                                now = datetime.now()
-                                time = '_MFH_' + str(now.hour) + '_' + str(now.minute) + '_' + str(now.second) + '_' +  str(now.microsecond)
-                                print(mod.domain_settings.cache_directory + time)
-                                if 'MFH' in mod.domain_settings.cache_directory:
-                                    m = re.match(r'^(.*)(_MFH_.*)$', mod.domain_settings.cache_directory)
-                                    if m:
-                                        mod.domain_settings.cache_directory = mod.domain_settings.cache_directory.replace(m.group(2), time)
-                                else:
-                                    mod.domain_settings.cache_directory = mod.domain_settings.cache_directory + time
+                                current_resolution = mod.domain_settings.resolution_max
+                                cache_path = mod.domain_settings.cache_directory
+                                shutil.rmtree(cache_path)
+                                mod.domain_settings.resolution_max = current_resolution
+                                
                                 return {'FINISHED'}
 
         return {'FINISHED'}
