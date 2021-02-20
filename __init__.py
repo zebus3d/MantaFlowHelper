@@ -86,7 +86,7 @@ class MHH_reset_cache(Operator):
                                 bpy.ops.screen.frame_jump(0)
                                 current_resolution = mod.domain_settings.resolution_max
                                 cache_path = mod.domain_settings.cache_directory
-                                shutil.rmtree(cache_path, ignore_errores = True)
+                                shutil.rmtree(cache_path, ignore_errors = True)
                                 mod.domain_settings.resolution_max = current_resolution
 
                                 return {'FINISHED'}
