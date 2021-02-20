@@ -5,7 +5,7 @@ import os, shutil
 bl_info = {
     "name": "MantaFlowHelper",
     "author": "Jorge Hernandez Melendez",
-    "version": (0, 4),
+    "version": (0, 5),
     "blender": (2, 90, 0),
     "location": "",
     "description": "",
@@ -96,7 +96,7 @@ class Confirm_Dialog(Operator):
     def execute(self, context):
         if self.confirm == 'True':
             for ob in bpy.context.view_layer.objects:
-                if ob.visible_get():
+                if not ob.hide_viewport:
                     if ob.type == 'MESH':
                         for mod in ob.modifiers:
                             if mod.type == 'FLUID':
