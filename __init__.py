@@ -1,6 +1,6 @@
 import bpy
 from datetime import datetime
-import re, os, shutil
+import os, shutil
 
 bl_info = {
     "name": "MantaFlowHelper",
@@ -70,6 +70,7 @@ class MHH_prepare(Operator):
 
         return {'FINISHED'}
 
+
 class MHH_reset_cache(Operator):
     bl_idname = "mfh.rcache"
     bl_label = "Reset Cache"
@@ -87,16 +88,18 @@ class MHH_reset_cache(Operator):
                                 cache_path = mod.domain_settings.cache_directory
                                 shutil.rmtree(cache_path)
                                 mod.domain_settings.resolution_max = current_resolution
-                                
+
                                 return {'FINISHED'}
 
         return {'FINISHED'}
+
 
 all_classes = [
     MFH_PT_ui,
     MHH_prepare,
     MHH_reset_cache,
 ]
+
 
 def register():
     from bpy.utils import register_class
